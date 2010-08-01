@@ -2,6 +2,9 @@
 
 (defstruct ball x y r direction-x direction-y vel-x vel-y color)
 
+(defvar *inertia* 0.9
+  "Value to remove to the velocity of the balls at every frame")
+
 (defun invert-direction-ball (ball &key x y)
   "Invert the direction of a ball.
 
@@ -13,6 +16,12 @@ direction of the ball on the axis."
     (setf (ball-direction-y ball) (* -1 (ball-direction-y ball)))))
 
 (defun move-ball (ball)
+  (if (> (ball-vel-x ball) 0)
+    (setf (ball-vel-x ball) (- (ball-vel-x ball) *inertia*))
+    (setf (ball-vel-x ball) 0))
+  (if (> (ball-vel-y ball) 0)
+    (setf (ball-vel-y ball) (- (ball-vel-y ball) *inertia*))
+    (setf (ball-vel-y ball) 0))
   (incf (ball-x ball) (* (ball-vel-x ball) (ball-direction-x ball)))
   (incf (ball-y ball) (* (ball-vel-y ball) (ball-direction-y ball))))
 
@@ -21,7 +30,8 @@ direction of the ball on the axis."
     (move-ball ball)))
 
 (defun draw-ball (ball)
-  (sdl:draw-circle-* (ball-x ball) (ball-y ball) (ball-r ball) :color (ball-color ball)))
+  (sdl:draw-circle-* (round (ball-x ball)) (round (ball-y ball)) (ball-r ball)
+    :color (ball-color ball)))
 
 (defun draw-balls (list-balls)
   (dolist (ball list-balls)
@@ -167,7 +177,38 @@ is necessary to use >= on the y coordinates."
           ;; In this case, we change the values of direction-x and direction-y on both balls
           (t
             (invert-direction-ball ball-1 :x 1 :y 1)
+            (invert-direction-ball ball-2 :x 1 :y 1))))
+
+      ((and (is-above-p (top-side ball-1) (bottom-side ball-2))
+         (<= (left-side ball-1) (right-side ball-2)))
+        (cond
+          ((> (delta (left-side ball-1) (right-side ball-2))
+             (delta (top-side ball-1) (bottom-side ball-2)))
+            (invert-direction-ball ball-1 :y 1)
+            (invert-direction-ball ball-2 :y 1))
+          ((> (delta (top-side ball-1) (bottom-side ball-2))
+             (delta (left-side ball-1) (right-side ball-2)))
+            (invert-direction-ball ball-1 :x 1)
+            (invert-direction-ball ball-2 :x 1))
+          (t
+            (invert-direction-ball ball-1 :x 1 :y 1)
+            (invert-direction-ball ball-2 :x 1 :y 1))))
+
+      ((and (is-above-p (top-side ball-1) (bottom-side ball-2))
+         (<= (left-side ball-2) (right-side ball-1)))
+        (cond
+          ((> (delta (left-side ball-2) (right-side ball-1))
+             (delta (top-side ball-1) (bottom-side ball-2)))
+            (invert-direction-ball ball-1 :y 1)
+            (invert-direction-ball ball-2 :y 1))
+          ((> (delta (top-side ball-1) (bottom-side ball-2))
+             (delta (left-side ball-2) (right-side ball-1)))
+            (invert-direction-ball ball-1 :x 1)
+            (invert-direction-ball ball-2 :x 1))
+          (t
+            (invert-direction-ball ball-1 :x 1 :y 1)
             (invert-direction-ball ball-2 :x 1 :y 1)))))))
+            
 
 
 (defun overlap-balls (ball-1 ball-2)
@@ -191,13 +232,13 @@ is necessary to use >= on the y coordinates."
         points))))
 
 (defun billard ()
-  (let* ((bola1 (make-ball :x 50 :y 50 :r 10
-                  :direction-x 1 :direction-y 1
-                  :vel-x 1 :vel-y 0
+  (let* ((bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 20
+                  :direction-x -1 :direction-y 1
+                  :vel-x 6 :vel-y 6
                   :color sdl:*yellow*))
-          (bola2 (make-ball :x 90 :y 50 :r 10
-                   :direction-x -1 :direction-y -1
-                   :vel-x 1 :vel-y 0
+          (bola2 (make-ball :x 80 :y 280 :r 30
+                   :direction-x 1 :direction-y -1
+                   :vel-x 6 :vel-y 6
                    :color sdl:*cyan*))
           (bolas (list bola1 bola2))
           (window-width 800)
@@ -223,8 +264,6 @@ is necessary to use >= on the y coordinates."
                         (invert-direction-ball ball :x 1)))
             bolas)
           (verify-collision-between-2-balls (car bolas) (cadr bolas))
-          (when (overlap-balls (car bolas) (car bolas))
-            (print "foo"))
           (move-balls bolas)
           (draw-balls bolas)
           (sdl:update-display))))))
