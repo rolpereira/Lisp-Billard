@@ -72,12 +72,7 @@ is necessary to use >= on the y coordinates."
       ;;          |   |
       ;;          +---+
       ((and (is-above-p (top-side ball-2) (bottom-side ball-1))
-         (<= (left-side ball-2) (right-side ball-1))
-                                        ;       (is-above-p (top-side ball-1) (top-side ball-2))
-                                        ;       (is-above-p (bottom-side ball-1) (bottom-side ball-2))
-                                        ;(<= (left-side ball-1) (left-side ball-2))
-                                        ;(<= (right-side ball-1) (right-side ball-2)))
-         )
+         (<= (left-side ball-2) (right-side ball-1)))
         (cond
           ;; Check to see if the following situation happened:
           ;;    +---+   
@@ -133,10 +128,6 @@ is necessary to use >= on the y coordinates."
       ;; +---+   
       ((and (is-above-p (top-side ball-2) (bottom-side ball-1))
          (<= (left-side ball-1) (right-side ball-2)))
-                                        ;       (is-above-p (top-side ball-1) (top-side ball-2))
-                                        ;       (is-above-p (bottom-side ball-2) (bottom-side ball-2))
-                                        ;(<= (left-side ball-2) (left-side ball-1))
-                                        ;(<= (right-side ball-1) (right-side ball-2)))
         (cond
           ;; Check to see if the following situation happened:
           ;;  +---+  
