@@ -239,6 +239,32 @@ is necessary to use >= on the y coordinates."
 (defun create-initial-balls ()
   "Returns a list of balls, on the position they should occupy in the beginning of the game"
   (let* ((radius 20) ; Radius of every ball
+          ;; The order of the placement of the balls
+          ;;
+          ;;        ---                 
+          ;;       /   \                
+          ;;       | 6 |---             
+          ;;       \   /   \            
+          ;;        ---| 12|---         
+          ;;       /   \   /   \        
+          ;;       | 5 |---| 1 |---     
+          ;;       \   /   \   /   \    
+          ;;        ---| 11|---| 9 |--- 
+          ;;       /   \   /   \   /   \
+          ;;       | 4 |---| M |---| 3 |
+          ;;       \   /   \   /   \   /
+          ;;        ---| 13|---| 10|--- 
+          ;;       /   \   /   \   /    
+          ;;       | 7 |---| 2 |---     
+          ;;       \   /   \   /        
+          ;;        ---| 14|---         
+          ;;       /   \   /            
+          ;;       | 8 |---             
+          ;;       \   /                
+          ;;        ---
+          ;;
+          ;; The M ball represents the middle-ball
+          
           ;; The middle-ball is the black ball on the oficial game
           (middle-ball (create-ball-stand-still 400 300 radius))
           ;; ball-1 and ball-2 are, on that order, above and below the middle-ball
@@ -256,8 +282,23 @@ is necessary to use >= on the y coordinates."
           (ball-7 (create-ball-stand-still (- 400 (+ (* 4 radius) 2))
                     (+ 300 (+ (* 2 radius) 2)) radius))
           (ball-8 (create-ball-stand-still (- 400 (+ (* 4 radius) 2))
-                    (+ 300 (+ (* 4 radius) 2)) radius)))
-    (list middle-ball ball-1 ball-2 ball-3 ball-4 ball-5 ball-6 ball-7 ball-8)))
+                    (+ 300 (+ (* 4 radius) 2)) radius))
+          
+          (ball-9 (create-ball-stand-still (+ 400 (+ (* 2 radius) 2))
+                    (- 300 (+ radius 2)) radius))
+          (ball-10 (create-ball-stand-still (+ 400 (+ (* 2 radius) 2))
+                     (+ 300 (+ radius 2)) radius))
+
+          (ball-11 (create-ball-stand-still (- 400 (+ (* 2 radius) 2))
+                     (- 300 (+ radius 2)) radius))
+          (ball-12 (create-ball-stand-still (- 400 (+ (* 2 radius) 2))
+                     (- 300 (+ (* 3 radius) 2)) radius))
+          (ball-13 (create-ball-stand-still (- 400 (+ (* 2 radius) 2))
+                     (+ 300 (+ radius 2)) radius))
+          (ball-14 (create-ball-stand-still (- 400 (+ (* 2 radius) 2))
+                     (+ 300 (+ (* 3 radius) 2)) radius)))
+    (list middle-ball ball-1 ball-2 ball-3 ball-4 ball-5 ball-6 ball-7 ball-8
+      ball-9 ball-10 ball-11 ball-12 ball-13 ball-14)))
  
 
 (defun billard ()
