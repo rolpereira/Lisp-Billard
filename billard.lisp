@@ -172,54 +172,33 @@ is necessary to use >= on the y coordinates."
 
 (defun overlap-balls (ball-1 ball-2)
   "Indicates if ball-2 overlaps ball-1"
-  ;; There is a need to check the overlap for the 4 corners of the
-  ;; "rectangle" that contains the ball.
-  ;; The value of the `CONS' is (X Y) of the point.
-  ;; FIXME: WHY DO I NEED TO DO THIS AND CAN'T USE A CONS?
-  (let ((point-1x (left-side ball-2))
-         (point-1y (top-side ball-2))
-         (point-2x (left-side ball-2))
-         (point-2y (bottom-side ball-2))
-         (point-3x (right-side ball-2))
-         (point-3y (bottom-side ball-2))
-         (point-4x (right-side ball-2))
-         (point-4y (top-side ball-2)))
-    (or
-      (and
-        ;; Check the values in X
-        (and (<= (left-side ball-1) point-1x)
-          (<= point-1x (right-side ball-1)))
-        ;; Check the values in Y
-        (and (<= (top-side ball-1) point-1y)
-          (<= point-1y (bottom-side ball-1))))
-      (and
-        ;; Check the values in X
-        (and (<= (left-side ball-1) point-2x)
-          (<= point-2x (right-side ball-1)))
-        ;; Check the values in Y
-        (and (<= (top-side ball-1) point-2y)
-          (<= point-2y (bottom-side ball-1))))
-      (and
-        ;; Check the values in X
-        (and (<= (left-side ball-1) point-3x)
-          (<= point-3x (right-side ball-1)))
-        ;; Check the values in Y
-        (and (<= (top-side ball-1) point-3y)
-          (<= point-3y (bottom-side ball-1))))
-      (and
-        ;; Check the values in X
-        (and (<= (left-side ball-1) point-4x)
-          (<= point-4x (right-side ball-1)))
-        ;; Check the values in Y
-        (and (<= (top-side ball-1) point-4y)
-          (<= point-4y (bottom-side ball-1)))))))
-
-
-
+  (let* ((point-1 (list (right-side ball-2) (top-side ball-2)))
+          (point-2 (list (right-side ball-2) (bottom-side ball-2)))
+          (point-3 (list (left-side ball-2) (bottom-side ball-2)))
+          (point-4 (list (left-side ball-2) (top-side ball-2)))
+          (points (list point-1 point-2 point-3 point-4)))
+    (remove-if #'null
+      (mapcar #'(lambda (point)
+                  (let ((point-x (car point))
+                         (point-y (cadr point)))
+                    (and
+                      ;; Check the values in X
+                      (and (<= (left-side ball-1) point-x)
+                        (<= point-x (right-side ball-1)))
+                      ;; Check the values in Y
+                      (and (<= (top-side ball-1) point-y)
+                        (<= point-y (bottom-side ball-1))))))
+        points))))
 
 (defun billard ()
-  (let* ((bola1 (make-ball :x 50 :y 50 :r 10 :direction-x 1 :direction-y 1 :vel-x 5 :vel-y 5 :color sdl:*yellow*))
-          (bola2 (make-ball :x 300 :y 300 :r 10 :direction-x -1 :direction-y -1 :vel-x 5 :vel-y 5 :color sdl:*cyan*))
+  (let* ((bola1 (make-ball :x 50 :y 50 :r 10
+                  :direction-x 1 :direction-y 1
+                  :vel-x 1 :vel-y 0
+                  :color sdl:*yellow*))
+          (bola2 (make-ball :x 90 :y 50 :r 10
+                   :direction-x -1 :direction-y -1
+                   :vel-x 1 :vel-y 0
+                   :color sdl:*cyan*))
           (bolas (list bola1 bola2))
           (window-width 800)
           (window-height 600))
@@ -244,6 +223,8 @@ is necessary to use >= on the y coordinates."
                         (invert-direction-ball ball :x 1)))
             bolas)
           (verify-collision-between-2-balls (car bolas) (cadr bolas))
+          (when (overlap-balls (car bolas) (car bolas))
+            (print "foo"))
           (move-balls bolas)
           (draw-balls bolas)
           (sdl:update-display))))))
