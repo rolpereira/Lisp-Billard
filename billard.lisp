@@ -208,8 +208,6 @@ is necessary to use >= on the y coordinates."
           (t
             (invert-direction-ball ball-1 :x 1 :y 1)
             (invert-direction-ball ball-2 :x 1 :y 1)))))))
-            
-
 
 (defun overlap-balls (ball-1 ball-2)
   "Indicates if ball-2 overlaps ball-1"
@@ -231,16 +229,48 @@ is necessary to use >= on the y coordinates."
                         (<= point-y (bottom-side ball-1))))))
         points))))
 
+(defun create-ball-stand-still (x y r)
+  "Creates a ball with color `COLOR' on coordinates (X Y), but with velocity 0."
+  (make-ball :x x :y y :r r
+    :direction-x 0 :direction-y 0
+    :vel-x 0 :vel-y 0
+    :color sdl:*green*))
+
+(defun create-initial-balls ()
+  "Returns a list of balls, on the position they should occupy in the beginning of the game"
+  (let* ((radius 20) ; Radius of every ball
+          ;; The middle-ball is the black ball on the oficial game
+          (middle-ball (create-ball-stand-still 400 300 radius))
+          ;; ball-1 and ball-2 are, on that order, above and below the middle-ball
+          (ball-1 (create-ball-stand-still 400 (- 300 (+ (* 2 radius) 2))
+                    radius))
+          (ball-2 (create-ball-stand-still 400 (+ 300 (+ (* 2 radius) 2)) radius))
+          ;; ball-3 is the ball facing towards the white ball
+          (ball-3 (create-ball-stand-still (+ 400 (+ (* 4 radius) 2)) 300 radius))
+          ;; balls 4 through 8 are on the column futher away from the white ball
+          (ball-4 (create-ball-stand-still (- 400 (+ (* 4 radius) 2)) 300 radius))
+          (ball-5 (create-ball-stand-still (- 400 (+ (* 4 radius) 2))
+                    (- 300 (+ (* 2 radius) 2)) radius))
+          (ball-6 (create-ball-stand-still (- 400 (+ (* 4 radius) 2))
+                    (- 300 (+ (* 4 radius) 2)) radius))
+          (ball-7 (create-ball-stand-still (- 400 (+ (* 4 radius) 2))
+                    (+ 300 (+ (* 2 radius) 2)) radius))
+          (ball-8 (create-ball-stand-still (- 400 (+ (* 4 radius) 2))
+                    (+ 300 (+ (* 4 radius) 2)) radius)))
+    (list middle-ball ball-1 ball-2 ball-3 ball-4 ball-5 ball-6 ball-7 ball-8)))
+ 
+
 (defun billard ()
-  (let* ((bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 20
-                  :direction-x -1 :direction-y 1
-                  :vel-x 6 :vel-y 6
-                  :color sdl:*yellow*))
-          (bola2 (make-ball :x 80 :y 280 :r 30
-                   :direction-x 1 :direction-y -1
-                   :vel-x 6 :vel-y 6
-                   :color sdl:*cyan*))
-          (bolas (list bola1 bola2))
+  (let* (;; (bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 20
+         ;;          :direction-x -1 :direction-y 1
+         ;;          :vel-x 15 :vel-y 15
+         ;;          :color sdl:*yellow*))
+         ;;  (bola2 (make-ball :x 80 :y 280 :r 30
+         ;;           :direction-x 1 :direction-y -1
+         ;;           :vel-x 15 :vel-y 15
+         ;;           :color sdl:*cyan*))
+         ;; (bolas (list bola1 bola2))
+          (bolas (create-initial-balls))
           (window-width 800)
           (window-height 600))
     (sdl:with-init ()
@@ -263,7 +293,7 @@ is necessary to use >= on the y coordinates."
                               (<= (left-side ball) 0))
                         (invert-direction-ball ball :x 1)))
             bolas)
-          (verify-collision-between-2-balls (car bolas) (cadr bolas))
+          ;(verify-collision-between-2-balls (car bolas) (cadr bolas))
           (move-balls bolas)
           (draw-balls bolas)
           (sdl:update-display))))))
