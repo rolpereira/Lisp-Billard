@@ -75,8 +75,9 @@ is necessary to use >= on the y coordinates."
          (<= (left-side ball-2) (right-side ball-1))
                                         ;       (is-above-p (top-side ball-1) (top-side ball-2))
                                         ;       (is-above-p (bottom-side ball-1) (bottom-side ball-2))
-         (<= (left-side ball-1) (left-side ball-2))
-         (<= (right-side ball-1) (right-side ball-2)))
+                                        ;(<= (left-side ball-1) (left-side ball-2))
+                                        ;(<= (right-side ball-1) (right-side ball-2)))
+         )
         (cond
           ;; Check to see if the following situation happened:
           ;;    +---+   
@@ -119,27 +120,63 @@ is necessary to use >= on the y coordinates."
           ;; In this case, we change the values of direction-x and direction-y on both balls
           (t
             (invert-direction-ball ball-1 :x 1 :y 1)
-            (invert-direction-ball ball-2 :x 1 :y 1)))))))
-    
-    ((and (is-above-p (top-side ball-2) (bottom-side ball-1))
-       (<= (left-side ball-1) (right-side ball-2))
-;       (is-above-p (top-side ball-1) (top-side ball-2))
-;       (is-above-p (bottom-side ball-2) (bottom-side ball-2))
-       (<= (left-side ball-2) (left-side ball-1))
-       (<= (right-side ball-1) (right-side ball-2)))
+            (invert-direction-ball ball-2 :x 1 :y 1))))
 
-      (cond
-        ((> (delta (left-side ball-1) (right-side ball-2))
-           (delta (top-side ball-2) (bottom-side ball-1)))
-          (invert-direction-ball ball-1 :y 1)
-          (invert-direction-ball ball-2 :y 1))
-        ((> (delta (top-side ball-2) (bottom-side ball-2))
-           (delta (left-side ball-1) (right-side ball-2)))
-          (invert-direction-ball ball-1 :x 1)
-          (invert-direction-ball ball-2 :y 1))
-        (t
-          (invert-direction-ball ball-1 :x 1 :y 1)
-          (invert-direction-ball ball-2 :x 1 :y 1))))))
+      ;; First check for the situation similar to this one:
+      ;;    +---+
+      ;;    |   |
+      ;;    | 1 |  
+      ;; +--++  |
+      ;; |  ++--+
+      ;; | 2 |   
+      ;; |   |   
+      ;; +---+   
+      ((and (is-above-p (top-side ball-2) (bottom-side ball-1))
+         (<= (left-side ball-1) (right-side ball-2)))
+                                        ;       (is-above-p (top-side ball-1) (top-side ball-2))
+                                        ;       (is-above-p (bottom-side ball-2) (bottom-side ball-2))
+                                        ;(<= (left-side ball-2) (left-side ball-1))
+                                        ;(<= (right-side ball-1) (right-side ball-2)))
+        (cond
+          ;; Check to see if the following situation happened:
+          ;;  +---+  
+          ;;  |   |  
+          ;;  | 1 |  
+          ;; ++--+|  
+          ;; |+--++  
+          ;; | 2 |   
+          ;; |   |   
+          ;; +---+   
+          ;; In this case, we should only change the direction-y of the balls
+          ((> (delta (left-side ball-1) (right-side ball-2))
+             (delta (top-side ball-2) (bottom-side ball-1)))
+            (invert-direction-ball ball-1 :y 1)
+            (invert-direction-ball ball-2 :y 1))
+          ;; Check to see if the following situation happened:
+          ;;    +---+
+          ;; +--++  |
+          ;; |  ||1 |
+          ;; | 2||  |
+          ;; |  ++--+
+          ;; +---+   
+          ;; In this case, we should only change the direction-x of the balls
+          ((> (delta (top-side ball-2) (bottom-side ball-2))
+             (delta (left-side ball-1) (right-side ball-2)))
+            (invert-direction-ball ball-1 :x 1)
+            (invert-direction-ball ball-2 :y 1))
+          ;; Assume that the following situation happened:
+          ;;    +---+
+          ;;    |   |
+          ;;    | 1 |
+          ;; +--++  |
+          ;; |  ++--+
+          ;; | 2 |   
+          ;; |   |   
+          ;; +---+   
+          ;; In this case, we change the values of direction-x and direction-y on both balls
+          (t
+            (invert-direction-ball ball-1 :x 1 :y 1)
+            (invert-direction-ball ball-2 :x 1 :y 1)))))))
 
 
 (defun overlap-balls (ball-1 ball-2)
