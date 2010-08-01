@@ -1,4 +1,4 @@
-(require 'lisprebuilder-sdl)
+(require 'lispbuilder-sdl)
 
 (defstruct ball x y r direction-x direction-y vel-x vel-y color)
 
@@ -53,73 +53,145 @@ is necessary to use <= on the y coordinates."
 This is used because SDL uses the top-left corner as the
 coordinates (0,0), so to check if something is below another thing, it
 is necessary to use >= on the y coordinates."
-  (<= y-value-1 y-value-2))
+  (>= y-value-1 y-value-2))
 
 (defun delta (x y)
   (abs (- x y)))
 
 (defun verify-collision-between-2-balls (ball-1 ball-2)
-  ;; First check for the situation similar to this one:
-  ;;       +---+             
-  ;;       |   |             
-  ;;       | 1 |             
-  ;;       |  ++--+          
-  ;;       +--++  |          
-  ;;          | 2 |
-  ;;          |   |
-  ;;          +---+
-  (when (and (is-above-p (top-side ball-2) (bottom-side ball-1))
-          (<= (left-side ball-2) (right-side ball-1)))
+  ;; Can't do anything until the balls overlap
+  (when (overlap-balls ball-1 ball-2)
     (cond
-      ;; Check to see if the following situation happened:
-      ;;    +---+   
-      ;;    |   |   
-      ;;    | 1 |   
-      ;;    |+--++  
-      ;;    ++--+|  
-      ;;     | 2 |  
-      ;;     |   |  
-      ;;     +---+  
-      ;;
-      ;; In this case, we should only change the direction-y of the balls
-      ((> (delta (right-side ball-1) (left-side ball-2))
-         (delta (top-side ball-2) (bottom-side ball-1)))
-        (invert-direction-ball ball-1 :y 1)
-        (invert-direction-ball ball-2 :y 1))
-      ;; Check to see if the following situation happened:
-      ;; +---+   
-      ;; |  ++--+
-      ;; | 1||  |
-      ;; |  ||2 |
-      ;; +--++  |
-      ;;    +---+
-      ;;
-      ;; In this case, we should only change the direction-x of the balls
-      ((> (delta (top-side ball-2) (bottom-side ball-1))
-         (delta (right-side ball-1) (left-side ball-2)))
-        (invert-direction-ball ball-1 :x 1)
-        (invert-direction-ball ball-2 :x 1))
-      ;; Assume that the following situation happened:
-      ;; +---+   
-      ;; |   |   
-      ;; | 1 |   
-      ;; |  ++--+
-      ;; +--++  |
-      ;;    | 2 |
-      ;;    |   |
-      ;;    +---+      
-      ;;
-      ;; In this case, we change the values of direction-x and direction-y on both balls
-      (t
-        (invert-direction-ball ball-1 :x 1 :y 1)
-        (invert-direction-ball ball-2 :x 1 :y 1)))))
+      ;; First check for the situation similar to this one:
+      ;;       +---+             
+      ;;       |   |             
+      ;;       | 1 |             
+      ;;       |  ++--+          
+      ;;       +--++  |          
+      ;;          | 2 |
+      ;;          |   |
+      ;;          +---+
+      ((and (is-above-p (top-side ball-2) (bottom-side ball-1))
+         (<= (left-side ball-2) (right-side ball-1))
+                                        ;       (is-above-p (top-side ball-1) (top-side ball-2))
+                                        ;       (is-above-p (bottom-side ball-1) (bottom-side ball-2))
+         (<= (left-side ball-1) (left-side ball-2))
+         (<= (right-side ball-1) (right-side ball-2)))
+        (cond
+          ;; Check to see if the following situation happened:
+          ;;    +---+   
+          ;;    |   |   
+          ;;    | 1 |   
+          ;;    |+--++  
+          ;;    ++--+|  
+          ;;     | 2 |  
+          ;;     |   |  
+          ;;     +---+  
+          ;;
+          ;; In this case, we should only change the direction-y of the balls
+          ((> (delta (right-side ball-1) (left-side ball-2))
+             (delta (top-side ball-2) (bottom-side ball-1)))
+            (invert-direction-ball ball-1 :y 1)
+            (invert-direction-ball ball-2 :y 1))
+          ;; Check to see if the following situation happened:
+          ;; +---+   
+          ;; |  ++--+
+          ;; | 1||  |
+          ;; |  ||2 |
+          ;; +--++  |
+          ;;    +---+
+          ;;
+          ;; In this case, we should only change the direction-x of the balls
+          ((> (delta (top-side ball-2) (bottom-side ball-1))
+             (delta (right-side ball-1) (left-side ball-2)))
+            (invert-direction-ball ball-1 :x 1)
+            (invert-direction-ball ball-2 :x 1))
+          ;; Assume that the following situation happened:
+          ;; +---+   
+          ;; |   |   
+          ;; | 1 |   
+          ;; |  ++--+
+          ;; +--++  |
+          ;;    | 2 |
+          ;;    |   |
+          ;;    +---+      
+          ;;
+          ;; In this case, we change the values of direction-x and direction-y on both balls
+          (t
+            (invert-direction-ball ball-1 :x 1 :y 1)
+            (invert-direction-ball ball-2 :x 1 :y 1)))))))
+    
+    ((and (is-above-p (top-side ball-2) (bottom-side ball-1))
+       (<= (left-side ball-1) (right-side ball-2))
+;       (is-above-p (top-side ball-1) (top-side ball-2))
+;       (is-above-p (bottom-side ball-2) (bottom-side ball-2))
+       (<= (left-side ball-2) (left-side ball-1))
+       (<= (right-side ball-1) (right-side ball-2)))
+
+      (cond
+        ((> (delta (left-side ball-1) (right-side ball-2))
+           (delta (top-side ball-2) (bottom-side ball-1)))
+          (invert-direction-ball ball-1 :y 1)
+          (invert-direction-ball ball-2 :y 1))
+        ((> (delta (top-side ball-2) (bottom-side ball-2))
+           (delta (left-side ball-1) (right-side ball-2)))
+          (invert-direction-ball ball-1 :x 1)
+          (invert-direction-ball ball-2 :y 1))
+        (t
+          (invert-direction-ball ball-1 :x 1 :y 1)
+          (invert-direction-ball ball-2 :x 1 :y 1))))))
+
+
+(defun overlap-balls (ball-1 ball-2)
+  "Indicates if ball-2 overlaps ball-1"
+  ;; There is a need to check the overlap for the 4 corners of the
+  ;; "rectangle" that contains the ball.
+  ;; The value of the `CONS' is (X Y) of the point.
+  ;; FIXME: WHY DO I NEED TO DO THIS AND CAN'T USE A CONS?
+  (let ((point-1x (left-side ball-2))
+         (point-1y (top-side ball-2))
+         (point-2x (left-side ball-2))
+         (point-2y (bottom-side ball-2))
+         (point-3x (right-side ball-2))
+         (point-3y (bottom-side ball-2))
+         (point-4x (right-side ball-2))
+         (point-4y (top-side ball-2)))
+    (or
+      (and
+        ;; Check the values in X
+        (and (<= (left-side ball-1) point-1x)
+          (<= point-1x (right-side ball-1)))
+        ;; Check the values in Y
+        (and (<= (top-side ball-1) point-1y)
+          (<= point-1y (bottom-side ball-1))))
+      (and
+        ;; Check the values in X
+        (and (<= (left-side ball-1) point-2x)
+          (<= point-2x (right-side ball-1)))
+        ;; Check the values in Y
+        (and (<= (top-side ball-1) point-2y)
+          (<= point-2y (bottom-side ball-1))))
+      (and
+        ;; Check the values in X
+        (and (<= (left-side ball-1) point-3x)
+          (<= point-3x (right-side ball-1)))
+        ;; Check the values in Y
+        (and (<= (top-side ball-1) point-3y)
+          (<= point-3y (bottom-side ball-1))))
+      (and
+        ;; Check the values in X
+        (and (<= (left-side ball-1) point-4x)
+          (<= point-4x (right-side ball-1)))
+        ;; Check the values in Y
+        (and (<= (top-side ball-1) point-4y)
+          (<= point-4y (bottom-side ball-1)))))))
 
 
 
 
 (defun billard ()
-  (let* ((bola1 (make-ball :x 50 :y 50 :r 10 :direction-x 1 :direction-y 1 :vel-x 1 :vel-y 1 :color sdl:*yellow*))
-          (bola2 (make-ball :x 300 :y 300 :r 10 :direction-x -1 :direction-y -1 :vel-x 1 :vel-y 1 :color sdl:*cyan*))
+  (let* ((bola1 (make-ball :x 50 :y 50 :r 10 :direction-x 1 :direction-y 1 :vel-x 5 :vel-y 5 :color sdl:*yellow*))
+          (bola2 (make-ball :x 300 :y 300 :r 10 :direction-x -1 :direction-y -1 :vel-x 5 :vel-y 5 :color sdl:*cyan*))
           (bolas (list bola1 bola2))
           (window-width 800)
           (window-height 600))
