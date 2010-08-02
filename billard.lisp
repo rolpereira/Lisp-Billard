@@ -327,28 +327,51 @@ is necessary to use >= on the y coordinates."
 
 (defun draw-hole (hole)
   ;; FIXME: For now holes are just balls that don't move
-  (sdl:draw-circle-* (round (ball-x hole)) (round (ball-y hole)) (ball-r hole)
-    :color (ball-color hole)))
+  (sdl:draw-filled-circle-* (round (ball-x hole)) (round (ball-y hole)) (ball-r hole)
+    :color sdl:*black* :stroke-color sdl:*green*))
 
 (defun draw-holes (list-holes)
   (dolist (ball list-holes)
     (draw-hole ball)))
 
+(defun create-holes (x y width height)
+  (let ((radius 20))
+    (list ;; Holes on the corners of the table
+      (create-ball-stand-still x y radius)
+      (create-ball-stand-still (+ x width) y radius)
+      (create-ball-stand-still (+ x width) (+ y height) radius)
+      (create-ball-stand-still x (+ y height) radius)
+      ;; Holes on the middle of the table
+      (create-ball-stand-still (+ x (/ width 2)) y radius)
+      (create-ball-stand-still (+ x (/ width 2)) (+ y height) radius))))
+
+
+(defun draw-table (x y width height)
+  ;; The inside
+  (sdl:draw-rectangle-* x y width height)
+  ;; The outside
+  (sdl:draw-rectangle-* (- x 30) (- y 30) (+ width 60) (+ height 60)))
+    
 (defun billard ()
-  (let* ((bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 20
+  (let* ((bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 10
                   :direction-x -1 :direction-y 1
                   :vel-x 15 :vel-y 15
                   :color sdl:*yellow*))
-          (bola2 (make-ball :x 80 :y 280 :r 30
-                  :direction-x 1 :direction-y -1
-                  :vel-x 15 :vel-y 15
-                  :color sdl:*cyan*))
+          (bola2 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 10
+                   :direction-x 1 :direction-y -1
+                   :vel-x 15 :vel-y 15
+                   :color sdl:*cyan*))
           (bolas (list bola1 bola2))
-          ;(bolas (create-initial-balls 400 300 20))
-          ;(bolas (list bola1))
+          ;(bolas (create-initial-balls 200 300 10))
+                                        ;(bolas (list bola1))
 
+          ;; Table configurations
+          (table-x 100)
+          (table-y 100)
+          (table-width 600)
+          (table-height 400)
           ;; FIXME: For now holes are just balls that are stopped
-          (holes (list (create-ball-stand-still 50 50 20)))
+          (holes (create-holes table-x table-y table-width table-height))
           (window-width 800)
           (window-height 600))
     (sdl:with-init ()
@@ -365,22 +388,31 @@ is necessary to use >= on the y coordinates."
           (sdl:clear-display sdl:*black*)
           ;; TODO: This should probably be a macro, but it also works like this
           (mapcar #'(lambda (ball)
-                      (when (or (>= (bottom-side ball) window-height)
-                              (<= (top-side ball) 0))
+                      (when (or (>= (bottom-side ball) (+ table-y table-height))
+                              (<= (top-side ball) table-y))
                         (invert-direction-ball ball :y 1))
-                      (when (or (>= (right-side ball) window-width)
-                              (<= (left-side ball) 0))
+                      (when (or (>= (right-side ball) (+ table-x table-width))
+                              (<= (left-side ball) table-x))
                         (invert-direction-ball ball :x 1)))
             bolas)
-          ;(verify-collision-between-2-balls (car bolas) (cadr bolas))
-
+                                        ;(verify-collision-between-2-balls (car bolas) (cadr bolas))
+          
           ;; Verify collision with holes
+          ;; Remove balls that collide with holes
           (setf bolas (remove-if #'null
                         (mapcar #'(lambda (ball)
-                                    (unless (overlap-balls (car holes) ball)
+                                    ;; Verify if this ball is
+                                    ;; overlapping any of the
+                                    ;; existing holes
+                                    (unless (remove-if #'null
+                                              (mapcar #'(lambda (hole)
+                                                          (when (overlap-balls hole ball)
+                                                            hole))
+                                                holes))
                                       ball))
                           bolas)))
           (move-balls bolas)
+          (draw-table table-x table-y table-width table-height)
           (draw-balls bolas)
           (draw-holes holes)
           (sdl:update-display))))))
