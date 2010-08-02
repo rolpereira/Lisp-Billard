@@ -2,7 +2,7 @@
 
 (defstruct ball x y r direction-x direction-y vel-x vel-y color)
 
-(defvar *inertia* 0.9
+(defvar *inertia* 0.0
   "Value to remove to the velocity of the balls at every frame")
 
 (defun invert-direction-ball (ball &key x y)
@@ -207,7 +207,40 @@ is necessary to use >= on the y coordinates."
             (invert-direction-ball ball-2 :x 1))
           (t
             (invert-direction-ball ball-1 :x 1 :y 1)
-            (invert-direction-ball ball-2 :x 1 :y 1)))))))
+            (invert-direction-ball ball-2 :x 1 :y 1)))))
+    ;(exchange-energy-between-balls ball-1 ball-2)
+    ))
+
+(defun exchange-energy-between-balls (ball-1 ball-2)
+  ;; The ball with more velocity decelerates, while the ball with less
+  ;; velocity accelerates
+
+  ;; Check to see if the balls are the same
+  (unless (and (= (ball-x ball-1) (ball-x ball-2))
+            (= (ball-y ball-1) (ball-y ball-2)))
+    (let ((abs-vel-ball-1 (sqrt (+
+                                  (* (ball-vel-x ball-1)
+                                    (ball-vel-x ball-1))
+                                  (* (ball-vel-y ball-1)
+                                    (ball-vel-y ball-1)))))
+           (abs-vel-ball-2 (sqrt (+
+                                   (* (ball-vel-x ball-2)
+                                     (ball-vel-x ball-2))
+                                   (* (ball-vel-y ball-2)
+                                     (ball-vel-y ball-2))))))
+      (if (> abs-vel-ball-1 abs-vel-ball-2)
+        (progn
+          (setf (ball-vel-x ball-1) (- (ball-vel-x ball-1) 0.7))
+          (setf (ball-vel-x ball-2) (+ (ball-vel-x ball-2) 0.5))
+          (setf (ball-vel-y ball-1) (- (ball-vel-y ball-1) 0.7))
+          (setf (ball-vel-y ball-2) (+ (ball-vel-y ball-2) 0.5)))
+        (progn
+          (setf (ball-vel-x ball-1) (- (ball-vel-x ball-1) 0.7))
+          (setf (ball-vel-x ball-1) (+ (ball-vel-x ball-1) 0.5))
+          (setf (ball-vel-y ball-1) (- (ball-vel-y ball-1) 0.7))
+          (setf (ball-vel-y ball-1) (+ (ball-vel-y ball-1) 0.5)))))))
+    
+      
 
 (defun overlap-balls (ball-1 ball-2)
   "Indicates if ball-2 overlaps ball-1"
@@ -232,7 +265,7 @@ is necessary to use >= on the y coordinates."
 (defun create-ball-stand-still (x y r)
   "Creates a ball with color `COLOR' on coordinates (X Y), but with velocity 0."
   (make-ball :x x :y y :r r
-    :direction-x 0 :direction-y 0
+    :direction-x 1 :direction-y 1
     :vel-x 0 :vel-y 0
     :color sdl:*green*))
 
@@ -353,17 +386,17 @@ is necessary to use >= on the y coordinates."
   (sdl:draw-rectangle-* (- x 30) (- y 30) (+ width 60) (+ height 60)))
     
 (defun billard ()
-  (let* ((bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 10
-                  :direction-x -1 :direction-y 1
-                  :vel-x (+ 1 (random 15)) :vel-y (+ 1 (random 15))
-                  :color sdl:*yellow*))
-          (bola2 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 10
-                   :direction-x 1 :direction-y -1
-                   :vel-x (+ 1 (random 15)) :vel-y (+ 1 (random 15))
-                   :color sdl:*cyan*))
-          (bolas (list bola1 bola2))
-          ;(bolas (create-initial-balls 200 300 10))
-                                        ;(bolas (list bola1))
+  (let* (;; (bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 10
+         ;;          :direction-x -1 :direction-y 1
+         ;;          :vel-x 0 :vel-y 0
+         ;;          :color sdl:*yellow*))
+         ;;  (bola2 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 10
+         ;;           :direction-x 1 :direction-y -1
+         ;;           :vel-x 0 :vel-y 0
+         ;;           :color sdl:*cyan*))
+         ;;  (bolas (list bola1 bola2))
+          
+          (bolas (create-initial-balls 200 300 10))
 
           ;; Table configurations
           (table-x 100)
@@ -374,6 +407,11 @@ is necessary to use >= on the y coordinates."
           (holes (create-holes table-x table-y table-width table-height))
           (window-width 800)
           (window-height 600))
+    (push (make-ball :x 600 :y 300 :r 10
+            :direction-x 1 :direction-y 1
+            :vel-x 0 :vel-y 0
+            :color sdl:*white*)
+      bolas)
     (sdl:with-init ()
       (sdl:window window-width window-height :position t
         :title-caption "Billard")
