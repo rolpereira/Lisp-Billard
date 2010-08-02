@@ -30,7 +30,7 @@ direction of the ball on the axis."
     (move-ball ball)))
 
 (defun draw-ball (ball)
-  (sdl:draw-circle-* (round (ball-x ball)) (round (ball-y ball)) (ball-r ball)
+  (sdl:draw-filled-circle-* (round (ball-x ball)) (round (ball-y ball)) (ball-r ball)
     :color (ball-color ball)))
 
 (defun draw-balls (list-balls)
@@ -330,8 +330,9 @@ is necessary to use >= on the y coordinates."
   (sdl:draw-circle-* (round (ball-x hole)) (round (ball-y hole)) (ball-r hole)
     :color (ball-color hole)))
 
-
- 
+(defun draw-holes (list-holes)
+  (dolist (ball list-holes)
+    (draw-hole ball)))
 
 (defun billard ()
   (let* ((bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 20
@@ -354,7 +355,7 @@ is necessary to use >= on the y coordinates."
       (sdl:window window-width window-height :position t
         :title-caption "Billard")
       (draw-balls bolas)
-      (draw-balls holes)
+      (draw-holes holes)
       (sdl:with-events ()
         (:quit-event () t)
         (:key-down-event ()
@@ -381,5 +382,5 @@ is necessary to use >= on the y coordinates."
                           bolas)))
           (move-balls bolas)
           (draw-balls bolas)
-          (draw-balls holes)
+          (draw-holes holes)
           (sdl:update-display))))))
