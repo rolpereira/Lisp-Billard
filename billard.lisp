@@ -281,30 +281,30 @@ is necessary to use >= on the y coordinates."
     return-list))
           
                              
-(defun create-initial-balls (mid-x mid-y radius &key (separation 2))
+(defun create-initial-balls (mid-x mid-y radius)
   "Returns a list of balls, on the position they should occupy in the beginning of the game"
   (let* (
-          ;; The order of the placement of the balls
+          ;; The order in which the balls are created
           ;;
           ;;        ---                 
           ;;       /   \                
-          ;;       | 6 |---             
+          ;;       | 13|---             
           ;;       \   /   \            
-          ;;        ---| 12|---         
+          ;;        ---| 9 |---         
           ;;       /   \   /   \        
-          ;;       | 5 |---| 1 |---     
+          ;;       | 11|---| 4 |---     
           ;;       \   /   \   /   \    
-          ;;        ---| 11|---| 9 |--- 
+          ;;        ---| 7 |---| 2 |--- 
           ;;       /   \   /   \   /   \
-          ;;       | 4 |---| M |---| 3 |
+          ;;       | 15|---| M |---| 1 |
           ;;       \   /   \   /   \   /
-          ;;        ---| 13|---| 10|--- 
+          ;;        ---| 8 |---| 3 |--- 
           ;;       /   \   /   \   /    
-          ;;       | 7 |---| 2 |---  ^   
+          ;;       | 12|---| 5 |---  ^   
           ;;       \   /   \   /     |     
-          ;;        ---| 14|---  ^    \__ Column -2 
+          ;;        ---| 10|---  ^    \__ Column -2 
           ;;       /   \   /    |     
-          ;;       | 8 |---  ^    \______ Column -1     
+          ;;       | 14|---  ^    \______ Column -1     
           ;;       \   /     |          
           ;;        ---  ^    \__________ Column 0
           ;;             |
@@ -315,45 +315,14 @@ is necessary to use >= on the y coordinates."
           ;; To add more balls just keep increasing the number of columns
           ;;
           ;; The M ball represents the middle-ball
-          ;; Create middle-column
-          (middle-column (create-column-balls 0 mid-x mid-y radius))
           ;; The middle-ball is the black ball on the oficial game
-          ;(middle-ball (create-ball-stand-still mid-x mid-y radius))
-          ;; ball-1 and ball-2 are, on that order, above and below the middle-ball
-          ;(ball-1 (create-ball-stand-still mid-x (- mid-y (+ (* 2 radius) separation))
-          ;;          radius))
-          ;(ball-2 (create-ball-stand-still mid-x (+ mid-y (+ (* 2 radius) separation)) radius))
-          ;; ball-3 is the ball facing towards the white ball
-          (column-facing-white-ball (create-column-balls -2 mid-x mid-y radius))
-          ;;(ball-3 (create-ball-stand-still (+ mid-x (+ (* 4 radius) separation)) mid-y radius))
-          ;; balls 4 through 8 are on the column futher away from the white ball
-          ;; (ball-4 (create-ball-stand-still (- mid-x (+ (* 4 radius) separation)) mid-y radius))
-          ;; (ball-5 (create-ball-stand-still (- mid-x (+ (* 4 radius) separation))
-          ;;           (- mid-y (+ (* 2 radius) separation)) radius))
-          ;; (ball-6 (create-ball-stand-still (- mid-x (+ (* 4 radius) separation))
-          ;;           (- mid-y (+ (* 4 radius) separation)) radius))
-          ;; (ball-7 (create-ball-stand-still (- mid-x (+ (* 4 radius) separation))
-          ;;           (+ mid-y (+ (* 2 radius) separation)) radius))
-          ;; (ball-8 (create-ball-stand-still (- mid-x (+ (* 4 radius) separation))
-          ;;           (+ mid-y (+ (* 4 radius) separation)) radius))
-
-          (end-column (create-column-balls 2 mid-x mid-y radius))
-          ;; (ball-9 (create-ball-stand-still (+ mid-x (+ (* 2 radius) separation))
-          ;;           (- mid-y (+ radius 2)) radius))
-          ;; (ball-10 (create-ball-stand-still (+ mid-x (+ (* 2 radius) separation))
-          ;;            (+ mid-y (+ radius 2)) radius))
-          (column-1 (create-column-balls -1 mid-x mid-y radius))
-
-          (column-2 (create-column-balls 1 mid-x mid-y radius)))
-          ;; (ball-11 (create-ball-stand-still (- mid-x (+ (* 2 radius) separation))
-          ;;            (- mid-y (+ radius 2)) radius))
-          ;; (ball-12 (create-ball-stand-still (- mid-x (+ (* 2 radius) separation))
-          ;;            (- mid-y (+ (* 3 radius) separation)) radius))
-          ;; (ball-13 (create-ball-stand-still (- mid-x (+ (* 2 radius) separation))
-          ;;            (+ mid-y (+ radius separation)) radius))
-          ;; (ball-14 (create-ball-stand-still (- mid-x (+ (* 2 radius) separation))
-          ;;            (+ mid-y (+ (* 3 radius) separation)) radius)))
-    (append middle-column column-facing-white-ball end-column column-1 column-2 (create-column-balls 3 mid-x mid-y radius) (create-column-balls 4 mid-x mid-y radius))))
+          (column-1 (create-column-balls -2 mid-x mid-y radius))
+          (column-2 (create-column-balls -1 mid-x mid-y radius))
+          ;; Column where the middle-ball will be created
+          (column-3 (create-column-balls 0 mid-x mid-y radius))
+          (column-4 (create-column-balls 1 mid-x mid-y radius))
+          (column-5 (create-column-balls 2 mid-x mid-y radius)))
+    (append column-1 column-2 column-3 column-4 column-5)))
  
 
 (defun billard ()
