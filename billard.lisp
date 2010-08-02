@@ -239,7 +239,20 @@ is necessary to use >= on the y coordinates."
           (setf (ball-vel-x ball-1) (+ (ball-vel-x ball-1) 0.5))
           (setf (ball-vel-y ball-1) (- (ball-vel-y ball-1) 0.7))
           (setf (ball-vel-y ball-1) (+ (ball-vel-y ball-1) 0.5)))))))
-    
+
+(defun amostrate (x y r steps)
+  ;; FIXME. steps does nothing, this function always works as if steps
+  ;; had the value 6
+  (let ((deg (/ 180 steps))
+         (return-list '()))
+    (dolist (k '(0 1 2 3 4 5))
+      (push (cons (round (+ x (* r (cos (* (degree-to-rad (/ deg steps)) k)))))
+              (round (+ y (* r (sin (* (degree-to-rad (/ deg steps)) k))))))
+        return-list)
+      (push (cons (round (- x (* r (cos (* (degree-to-rad (/ deg steps)) k)))))
+              (round (- y (* r (sin (* (degree-to-rad (/ deg steps)) k))))))
+        return-list))
+    return-list))    
       
 
 (defun overlap-balls (ball-1 ball-2)
@@ -384,7 +397,8 @@ is necessary to use >= on the y coordinates."
   (sdl:draw-rectangle-* x y width height)
   ;; The outside
   (sdl:draw-rectangle-* (- x 30) (- y 30) (+ width 60) (+ height 60)))
-    
+
+
 (defun billard ()
   (let* (;; (bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 10
          ;;          :direction-x -1 :direction-y 1
@@ -459,3 +473,4 @@ is necessary to use >= on the y coordinates."
           (draw-balls bolas)
           (draw-holes holes)
           (sdl:update-display))))))
+
