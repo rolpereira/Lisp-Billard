@@ -5,15 +5,19 @@
 (defvar *inertia* 0.0
   "Value to remove to the velocity of the balls at every frame")
 
-(defun invert-direction-ball (ball &key x y)
+(defun invert-direction-ball (ball &rest axis)
   "Invert the direction of a ball.
 
-Keys `x' and `y' should have a value of 1 which will change the
-direction of the ball on the axis."
-  (when x
-    (setf (ball-direction-x ball) (* -1 (ball-direction-x ball))))
-  (when y
-    (setf (ball-direction-y ball) (* -1 (ball-direction-y ball)))))
+The list `AXIS' should be composed of the keywords :x or :y or both,
+and the ball will have the direction of the velocity of those axis
+inverted.
+
+Returns `NIL'."
+  (dolist (argument axis)
+    (when (equal argument :x)
+      (setf (ball-direction-x ball) (* -1 (ball-direction-x ball))))
+    (when (equal argument :y)
+      (setf (ball-direction-y ball) (* -1 (ball-direction-y ball))))))
 
 (defun move-ball (ball)
   "Updates the value of a vel-x and vel-y of a ball, only taking in
@@ -115,8 +119,8 @@ is necessary to use >= on the y coordinates."
           ;; In this case, we should only change the direction-y of the balls
           ((> (delta (right-side ball-1) (left-side ball-2))
              (delta (top-side ball-2) (bottom-side ball-1)))
-            (invert-direction-ball ball-1 :y 1)
-            (invert-direction-ball ball-2 :y 1))
+            (invert-direction-ball ball-1 :y)
+            (invert-direction-ball ball-2 :y))
           ;; Check to see if the following situation happened:
           ;; +---+   
           ;; |  ++--+
@@ -128,8 +132,8 @@ is necessary to use >= on the y coordinates."
           ;; In this case, we should only change the direction-x of the balls
           ((> (delta (top-side ball-2) (bottom-side ball-1))
              (delta (right-side ball-1) (left-side ball-2)))
-            (invert-direction-ball ball-1 :x 1)
-            (invert-direction-ball ball-2 :x 1))
+            (invert-direction-ball ball-1 :x)
+            (invert-direction-ball ball-2 :x))
           ;; Assume that the following situation happened:
           ;; +---+   
           ;; |   |   
@@ -142,8 +146,8 @@ is necessary to use >= on the y coordinates."
           ;;
           ;; In this case, we change the values of direction-x and direction-y on both balls
           (t
-            (invert-direction-ball ball-1 :x 1 :y 1)
-            (invert-direction-ball ball-2 :x 1 :y 1))))
+            (invert-direction-ball ball-1 :x :y)
+            (invert-direction-ball ball-2 :x :y))))
 
       ;; Check for the situation similar to this one:
       ;;    +---+
@@ -169,8 +173,8 @@ is necessary to use >= on the y coordinates."
           ;; In this case, we should only change the direction-y of the balls
           ((> (delta (left-side ball-1) (right-side ball-2))
              (delta (top-side ball-2) (bottom-side ball-1)))
-            (invert-direction-ball ball-1 :y 1)
-            (invert-direction-ball ball-2 :y 1))
+            (invert-direction-ball ball-1 :y)
+            (invert-direction-ball ball-2 :y))
           ;; Check to see if the following situation happened:
           ;;    +---+
           ;; +--++  |
@@ -181,8 +185,8 @@ is necessary to use >= on the y coordinates."
           ;; In this case, we should only change the direction-x of the balls
           ((> (delta (top-side ball-2) (bottom-side ball-2))
              (delta (left-side ball-1) (right-side ball-2)))
-            (invert-direction-ball ball-1 :x 1)
-            (invert-direction-ball ball-2 :y 1))
+            (invert-direction-ball ball-1 :x)
+            (invert-direction-ball ball-2 :y))
           ;; Assume that the following situation happened:
           ;;    +---+
           ;;    |   |
@@ -194,8 +198,8 @@ is necessary to use >= on the y coordinates."
           ;; +---+   
           ;; In this case, we change the values of direction-x and direction-y on both balls
           (t
-            (invert-direction-ball ball-1 :x 1 :y 1)
-            (invert-direction-ball ball-2 :x 1 :y 1))))
+            (invert-direction-ball ball-1 :x :y)
+            (invert-direction-ball ball-2 :x :y))))
 
       ;; Check for the situation similar to this one:
       ;; +---+    
@@ -221,8 +225,8 @@ is necessary to use >= on the y coordinates."
           ;; In this case, we should only change the direction-y of the balls
           ((> (delta (left-side ball-1) (right-side ball-2))
              (delta (top-side ball-1) (bottom-side ball-2)))
-            (invert-direction-ball ball-1 :y 1)
-            (invert-direction-ball ball-2 :y 1))
+            (invert-direction-ball ball-1 :y)
+            (invert-direction-ball ball-2 :y))
           ;; Check to see if the following situation happened:
           ;; +---+   
           ;; |  ++--+
@@ -233,8 +237,8 @@ is necessary to use >= on the y coordinates."
           ;; In this case, we should only change the direction-x of the balls
           ((> (delta (top-side ball-1) (bottom-side ball-2))
              (delta (left-side ball-1) (right-side ball-2)))
-            (invert-direction-ball ball-1 :x 1)
-            (invert-direction-ball ball-2 :x 1))
+            (invert-direction-ball ball-1 :x)
+            (invert-direction-ball ball-2 :x))
           ;; Assume that the following situation happened:
           ;; +---+   
           ;; |   |   
@@ -246,8 +250,8 @@ is necessary to use >= on the y coordinates."
           ;;    +---+
           ;; In this case, we change the values of direction-x and direction-y on both balls
           (t
-            (invert-direction-ball ball-1 :x 1 :y 1)
-            (invert-direction-ball ball-2 :x 1 :y 1))))
+            (invert-direction-ball ball-1 :x :y)
+            (invert-direction-ball ball-2 :x :y))))
 
       ;; Check for the situation similar to this one:
       ;;    +---+ 
@@ -273,8 +277,8 @@ is necessary to use >= on the y coordinates."
           ;; In this case, we should only change the direction-y of the balls
           ((> (delta (left-side ball-2) (right-side ball-1))
              (delta (top-side ball-1) (bottom-side ball-2)))
-            (invert-direction-ball ball-1 :y 1)
-            (invert-direction-ball ball-2 :y 1))
+            (invert-direction-ball ball-1 :y)
+            (invert-direction-ball ball-2 :y))
           ;; Check to see if the following situation happened:
           ;;    +---+
           ;; +--++  |
@@ -285,8 +289,8 @@ is necessary to use >= on the y coordinates."
           ;; In this case, we should only change the direction-x of the balls         
           ((> (delta (top-side ball-1) (bottom-side ball-2))
              (delta (left-side ball-2) (right-side ball-1)))
-            (invert-direction-ball ball-1 :x 1)
-            (invert-direction-ball ball-2 :x 1))
+            (invert-direction-ball ball-1 :x)
+            (invert-direction-ball ball-2 :x))
           ;; Assume that the following situation happened:
           ;;    +---+ 
           ;;    |   | 
@@ -298,8 +302,8 @@ is necessary to use >= on the y coordinates."
           ;; +---+    
           ;; In this case, we change the values of direction-x and direction-y on both balls
           (t
-            (invert-direction-ball ball-1 :x 1 :y 1)
-            (invert-direction-ball ball-2 :x 1 :y 1)))))
+            (invert-direction-ball ball-1 :x :y)
+            (invert-direction-ball ball-2 :x :y)))))
     ;(exchange-energy-between-balls ball-1 ball-2)
     ))
 
@@ -331,6 +335,9 @@ is necessary to use >= on the y coordinates."
           (setf (ball-vel-x ball-1) (+ (ball-vel-x ball-1) 0.5))
           (setf (ball-vel-y ball-1) (- (ball-vel-y ball-1) 0.7))
           (setf (ball-vel-y ball-1) (+ (ball-vel-y ball-1) 0.5)))))))
+
+(defun degree-to-rad (degree)
+  (* degree (/ pi 180)))
 
 (defun amostrate (x y r steps)
   ;; FIXME. steps does nothing, this function always works as if steps
@@ -442,7 +449,7 @@ is necessary to use >= on the y coordinates."
           ;;       | 12|---| 5 |---  ^   
           ;;       \   /   \   /     |     
           ;;        ---| 10|---  ^    \__ Column -2 
-          ;;       /   \   /    |     
+          ;;       /   \   /     |     
           ;;       | 14|---  ^    \______ Column -1     
           ;;       \   /     |          
           ;;        ---  ^    \__________ Column 0
@@ -497,17 +504,17 @@ is necessary to use >= on the y coordinates."
 
 
 (defun billard ()
-  (let* (;; (bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 10
-         ;;          :direction-x -1 :direction-y 1
-         ;;          :vel-x 0 :vel-y 0
-         ;;          :color sdl:*yellow*))
-         ;;  (bola2 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 10
-         ;;           :direction-x 1 :direction-y -1
-         ;;           :vel-x 0 :vel-y 0
-         ;;           :color sdl:*cyan*))
-         ;;  (bolas (list bola1 bola2))
+  (let* ((bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 10
+                  :direction-x -1 :direction-y 1
+                  :vel-x (1+ (random 15)) :vel-y (1+ (random 15))
+                  :color sdl:*yellow*))
+          (bola2 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 10
+                   :direction-x 1 :direction-y -1
+                   :vel-x (1+ (random 15)) :vel-y (1+ (random 15))
+                   :color sdl:*cyan*))
+          (bolas (list bola1 bola2))
           
-          (bolas (create-initial-balls 200 300 10))
+          ;;(bolas (create-initial-balls 200 300 10))
 
           ;; Table configurations
           (table-x 100)
@@ -520,7 +527,7 @@ is necessary to use >= on the y coordinates."
           (window-height 600))
     (push (make-ball :x 600 :y 300 :r 10
             :direction-x 1 :direction-y 1
-            :vel-x 0 :vel-y 0
+            :vel-x 15 :vel-y 0
             :color sdl:*white*)
       bolas)
     (sdl:with-init ()
@@ -539,10 +546,10 @@ is necessary to use >= on the y coordinates."
           (mapcar #'(lambda (ball)
                       (when (or (>= (bottom-side ball) (+ table-y table-height))
                               (<= (top-side ball) table-y))
-                        (invert-direction-ball ball :y 1))
+                        (invert-direction-ball ball :y))
                       (when (or (>= (right-side ball) (+ table-x table-width))
                               (<= (left-side ball) table-x))
-                        (invert-direction-ball ball :x 1)))
+                        (invert-direction-ball ball :x)))
             bolas)
 
           ;; Verify collision between balls
