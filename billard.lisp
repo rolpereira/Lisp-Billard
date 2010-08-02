@@ -16,6 +16,8 @@ direction of the ball on the axis."
     (setf (ball-direction-y ball) (* -1 (ball-direction-y ball)))))
 
 (defun move-ball (ball)
+  "Updates the value of a vel-x and vel-y of a ball, only taking in
+consideration the global inertia, ie. it doesn't detect collisions."
   (if (> (ball-vel-x ball) 0)
     (setf (ball-vel-x ball) (- (ball-vel-x ball) *inertia*))
     (setf (ball-vel-x ball) 0))
@@ -26,27 +28,42 @@ direction of the ball on the axis."
   (incf (ball-y ball) (* (ball-vel-y ball) (ball-direction-y ball))))
 
 (defun move-balls (list-balls)
+  "Calls the function move-ball for a list of balls."
   (dolist (ball list-balls)
     (move-ball ball)))
 
 (defun draw-ball (ball)
+  "Draw a ball on the screen."
   (sdl:draw-filled-circle-* (round (ball-x ball)) (round (ball-y ball)) (ball-r ball)
     :color (ball-color ball)))
 
 (defun draw-balls (list-balls)
+  "Calls the function draw-ball for a list of balls."
   (dolist (ball list-balls)
     (draw-ball ball)))
 
 (defun right-side (ball)
+  "Returns the value of the right side of a ball.
+
+It's the value of its rightmost pixel."
   (+ (ball-x ball) (ball-r ball)))
 
 (defun left-side (ball)
+  "Returns the value of the left side of a ball.
+
+It's the value of its leftmost pixel."
   (- (ball-x ball) (ball-r ball)))
 
 (defun bottom-side (ball)
+  "Returns the value of the bottom side of a ball.
+
+It's the value of its bottommost pixel." 
   (+ (ball-y ball) (ball-r ball)))
 
 (defun top-side (ball)
+  "Returns the value of the top side of a ball.
+
+It's the value of its topmost pixel."
   (- (ball-y ball) (ball-r ball)))
 
 (defun is-above-p (y-value-1 y-value-2)
@@ -66,6 +83,7 @@ is necessary to use >= on the y coordinates."
   (>= y-value-1 y-value-2))
 
 (defun delta (x y)
+  "Returns the distance between 2 points on a line."
   (abs (- x y)))
 
 (defun verify-collision-between-2-balls (ball-1 ball-2)
@@ -357,6 +375,7 @@ is necessary to use >= on the y coordinates."
     :color sdl:*green*))
 
 (defun create-column-balls (column-number mid-x mid-y radius &key (separation 2))
+  "Creates a vertical column of balls."
   (let (;; The number of balls on this column
          (number-of-balls (+ column-number 3))
          (value-x-of-column
@@ -446,15 +465,18 @@ is necessary to use >= on the y coordinates."
 
 
 (defun draw-hole (hole)
-  ;; FIXME: For now holes are just balls that don't move
+  "Draw a hole on the screen."
   (sdl:draw-filled-circle-* (round (ball-x hole)) (round (ball-y hole)) (ball-r hole)
     :color sdl:*black* :stroke-color sdl:*green*))
 
 (defun draw-holes (list-holes)
+  "Calls the function draw-hole on a list of holes."
   (dolist (ball list-holes)
     (draw-hole ball)))
 
 (defun create-holes (x y width height)
+  "Create 6 holes on the screen."
+  ;; FIXME: For now holes are just balls that don't move
   (let ((radius 20))
     (list ;; Holes on the corners of the table
       (create-ball-stand-still x y radius)
@@ -467,6 +489,7 @@ is necessary to use >= on the y coordinates."
 
 
 (defun draw-table (x y width height)
+  "Draw the table of the game."
   ;; The inside
   (sdl:draw-rectangle-* x y width height)
   ;; The outside
