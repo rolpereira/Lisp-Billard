@@ -355,11 +355,11 @@ is necessary to use >= on the y coordinates."
 (defun billard ()
   (let* ((bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 10
                   :direction-x -1 :direction-y 1
-                  :vel-x 15 :vel-y 15
+                  :vel-x (+ 1 (random 15)) :vel-y (+ 1 (random 15))
                   :color sdl:*yellow*))
           (bola2 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 10
                    :direction-x 1 :direction-y -1
-                   :vel-x 15 :vel-y 15
+                   :vel-x (+ 1 (random 15)) :vel-y (+ 1 (random 15))
                    :color sdl:*cyan*))
           (bolas (list bola1 bola2))
           ;(bolas (create-initial-balls 200 300 10))
@@ -395,9 +395,14 @@ is necessary to use >= on the y coordinates."
                               (<= (left-side ball) table-x))
                         (invert-direction-ball ball :x 1)))
             bolas)
-                                        ;(verify-collision-between-2-balls (car bolas) (cadr bolas))
-          
-          ;; Verify collision with holes
+
+          ;; Verify collision between balls
+          (dolist (ball-1 bolas)
+            (mapcar #'(lambda (ball-2)
+                        (verify-collision-between-2-balls ball-1 ball-2))
+              bolas))
+                    
+          ;; Verify collision between balls and holes
           ;; Remove balls that collide with holes
           (setf bolas (remove-if #'null
                         (mapcar #'(lambda (ball)
