@@ -239,19 +239,20 @@ is necessary to use >= on the y coordinates."
 (defun create-column-balls (column-number mid-x mid-y radius &key (separation 2))
   (let (;; The number of balls on this column
          (number-of-balls (+ column-number 3))
-         ;; The columns whose number is positive are the ones further
-         ;; away from the white ball
-         (column-number-positive-p (> column-number 0))
+         (value-x-of-column
+           ;; The columns whose number is positive are the ones further
+           ;; away from the white ball
+           (if (> column-number 0)
+             (- mid-x (+ (* 2 (abs column-number) radius) separation))
+             (+ mid-x (+ (* 2 (abs column-number) radius) separation))))
          (column-number (abs column-number))
          (return-list '()))
     (if (zerop (mod column-number 2))
       ;; This is the algorithm for placing balls on a even column
       ;; (for example, the one that contains the middle-ball)
-      (let ((value-x-of-column (if column-number-positive-p
-                                 (- mid-x (+ (* 2 column-number radius) separation))
-                                 (+ mid-x (+ (* 2 column-number radius) separation)))))
+      (progn
         ;; If the number-of-balls to draw is 1, then only draw the middle ball
-        ;; (It should be the column closest to the white ball)
+        ;; (this should only happend to the column closest to the white ball)
         (unless (= number-of-balls 1)
           ;; k indicates the distance between a ball and the column's middle ball
           (loop for k from 1 below number-of-balls by 2 do
@@ -267,20 +268,16 @@ is necessary to use >= on the y coordinates."
         ;; Create the column's middle ball
         (push (create-ball-stand-still value-x-of-column (+ mid-y separation) radius)
           return-list))
-
       ;; This is the algorithm for placing balls on a odd column
-      (let ((value-x-of-column (if column-number-positive-p
-                                 (- mid-x (+ (* 2 radius) separation))
-                                 (+ mid-x (+ (* 2 radius) separation)))))
-        ;; k indicates the distance between a ball and the middle ball on an odd column
-        (loop for k from 1 below number-of-balls by 2 do
-          (let ((delta-y-of-ball (+ (* k radius) separation)))
-            (push
-              (create-ball-stand-still value-x-of-column (- mid-y delta-y-of-ball) radius)
-              return-list)
-            (push
-              (create-ball-stand-still value-x-of-column (+ mid-y delta-y-of-ball) radius)
-              return-list)))))
+      ;; k indicates the distance between a ball and the middle ball on an odd column
+      (loop for k from 1 below number-of-balls by 2 do
+        (let ((delta-y-of-ball (+ (* k radius) separation)))
+          (push
+            (create-ball-stand-still value-x-of-column (- mid-y delta-y-of-ball) radius)
+            return-list)
+          (push
+            (create-ball-stand-still value-x-of-column (+ mid-y delta-y-of-ball) radius)
+            return-list))))
     return-list))
           
                              
@@ -303,16 +300,21 @@ is necessary to use >= on the y coordinates."
           ;;       \   /   \   /   \   /
           ;;        ---| 13|---| 10|--- 
           ;;       /   \   /   \   /    
-          ;;       | 7 |---| 2 |---     
-          ;;       \   /   \   /        
-          ;;        ---| 14|---         
-          ;;       /   \   /            
-          ;;       | 8 |---             
-          ;;       \   /                
-          ;;        ---
+          ;;       | 7 |---| 2 |---  ^   
+          ;;       \   /   \   /     |     
+          ;;        ---| 14|---  ^    \__ Column -2 
+          ;;       /   \   /    |     
+          ;;       | 8 |---  ^    \______ Column -1     
+          ;;       \   /     |          
+          ;;        ---  ^    \__________ Column 0
+          ;;             |
+          ;;         ^    \______________ Column 1
+          ;;         |
+          ;;          \__________________ Column 2
+          ;;
+          ;; To add more balls just keep increasing the number of columns
           ;;
           ;; The M ball represents the middle-ball
-
           ;; Create middle-column
           (middle-column (create-column-balls 0 mid-x mid-y radius))
           ;; The middle-ball is the black ball on the oficial game
@@ -351,7 +353,7 @@ is necessary to use >= on the y coordinates."
           ;;            (+ mid-y (+ radius separation)) radius))
           ;; (ball-14 (create-ball-stand-still (- mid-x (+ (* 2 radius) separation))
           ;;            (+ mid-y (+ (* 3 radius) separation)) radius)))
-    (append middle-column column-facing-white-ball end-column column-1 column-2)))
+    (append middle-column column-facing-white-ball end-column column-1 column-2 (create-column-balls 3 mid-x mid-y radius) (create-column-balls 4 mid-x mid-y radius))))
  
 
 (defun billard ()
