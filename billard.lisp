@@ -323,25 +323,38 @@ is necessary to use >= on the y coordinates."
           (column-4 (create-column-balls 1 mid-x mid-y radius))
           (column-5 (create-column-balls 2 mid-x mid-y radius)))
     (append column-1 column-2 column-3 column-4 column-5)))
+
+
+(defun draw-hole (hole)
+  ;; FIXME: For now holes are just balls that don't move
+  (sdl:draw-circle-* (round (ball-x hole)) (round (ball-y hole)) (ball-r hole)
+    :color (ball-color hole)))
+
+
  
 
 (defun billard ()
-  (let* (;; (bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 20
-         ;;          :direction-x -1 :direction-y 1
-         ;;          :vel-x 15 :vel-y 15
-         ;;          :color sdl:*yellow*))
-         ;;  (bola2 (make-ball :x 80 :y 280 :r 30
-         ;;           :direction-x 1 :direction-y -1
-         ;;           :vel-x 15 :vel-y 15
-         ;;           :color sdl:*cyan*))
-         ;; (bolas (list bola1 bola2))
-          (bolas (create-initial-balls 400 300 20))
+  (let* ((bola1 (make-ball :x (+ 100 (random 400)) :y (+ 100 (random 400)) :r 20
+                  :direction-x -1 :direction-y 1
+                  :vel-x 15 :vel-y 15
+                  :color sdl:*yellow*))
+          (bola2 (make-ball :x 80 :y 280 :r 30
+                  :direction-x 1 :direction-y -1
+                  :vel-x 15 :vel-y 15
+                  :color sdl:*cyan*))
+          (bolas (list bola1 bola2))
+          ;(bolas (create-initial-balls 400 300 20))
+          ;(bolas (list bola1))
+
+          ;; FIXME: For now holes are just balls that are stopped
+          (holes (list (create-ball-stand-still 50 50 20)))
           (window-width 800)
           (window-height 600))
     (sdl:with-init ()
       (sdl:window window-width window-height :position t
         :title-caption "Billard")
       (draw-balls bolas)
+      (draw-balls holes)
       (sdl:with-events ()
         (:quit-event () t)
         (:key-down-event ()
@@ -359,6 +372,14 @@ is necessary to use >= on the y coordinates."
                         (invert-direction-ball ball :x 1)))
             bolas)
           ;(verify-collision-between-2-balls (car bolas) (cadr bolas))
+
+          ;; Verify collision with holes
+          (setf bolas (remove-if #'null
+                        (mapcar #'(lambda (ball)
+                                    (unless (overlap-balls (car holes) ball)
+                                      ball))
+                          bolas)))
           (move-balls bolas)
           (draw-balls bolas)
+          (draw-balls holes)
           (sdl:update-display))))))
